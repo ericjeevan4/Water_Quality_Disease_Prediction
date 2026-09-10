@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Result</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --ink:#102227;
+    --teal-deep:#0B4F5C;
+    --teal:#146873;
+    --teal-bright:#1C8C93;
+    --paper:#F4F7F6;
+    --panel:#FFFFFF;
+    --line:#DCE6E4;
+    --rust:#B24A3B;
+    --rust-soft:#E7C9C3;
+    --muted:#5C7570;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+    --grotesk:'Space Grotesk', sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    padding:56px 24px 90px;
+  }
+
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+  }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--teal);
+    margin:0 0 10px 0;
+  }
+
+  h1{
+    font-family:var(--grotesk);
+    font-size:26px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0 0 40px 0;
+    color:var(--ink);
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:36px 38px;
+    margin-bottom:22px;
+  }
+
+  /* ---------- error ---------- */
+
+  .error-card{
+    border-left:4px solid var(--rust);
+    padding:28px 32px;
+  }
+
+  .error-card h2{
+    font-family:var(--grotesk);
+    font-size:18px;
+    margin:0 0 10px 0;
+    color:var(--rust);
+  }
+
+  .error-card p{
+    margin:0;
+    font-family:var(--mono);
+    font-size:13.5px;
+    color:var(--ink);
+    line-height:1.6;
+  }
+
+  /* ---------- readout ---------- */
+
+  .readout{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    background:
+      radial-gradient(120% 160% at 100% 0%, rgba(28,140,147,0.28), transparent 55%),
+      linear-gradient(175deg, var(--teal-deep) 0%, var(--ink) 100%);
+    color:#EAF3F2;
+    border-radius:4px;
+    padding:38px 40px;
+    margin-bottom:22px;
+  }
+
+  .readout-label{
+    font-family:var(--mono);
+    font-size:12px;
+    color:#8FC4C0;
+    margin:0 0 12px 0;
+  }
+
+  .readout-disease{
+    font-family:var(--grotesk);
+    font-size:34px;
+    font-weight:600;
+    line-height:1.15;
+    margin:0;
+  }
+
+  .readout-confidence{
+    text-align:right;
+    flex-shrink:0;
+  }
+
+  .readout-confidence .num{
+    font-family:var(--mono);
+    font-size:38px;
+    font-weight:500;
+    line-height:1;
+  }
+
+  .readout-confidence .cap{
+    font-family:var(--mono);
+    font-size:11px;
+    color:#8FC4C0;
+    margin-top:6px;
+  }
+
+  /* ---------- section headers ---------- */
+
+  h2.section{
+    font-family:var(--grotesk);
+    font-size:16px;
+    font-weight:600;
+    margin:0 0 22px 0;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+
+  /* ---------- probability distribution ---------- */
+
+  .probability-row{
+    margin-bottom:20px;
+  }
+
+  .probability-row:last-child{
+    margin-bottom:0;
+  }
+
+  .probability-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:7px;
+  }
+
+  .probability-header .name{
+    font-size:14px;
+    color:var(--ink);
+  }
+
+  .probability-header .pct{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .bar-container{
+    width:100%;
+    height:8px;
+    background:var(--line);
+    border-radius:2px;
+    overflow:hidden;
+  }
+
+  .bar{
+    height:100%;
+    background:var(--teal-bright);
+    border-radius:2px;
+  }
+
+  /* ---------- SHAP tornado ---------- */
+
+  .shap-description{
+    color:var(--muted);
+    font-size:13.5px;
+    line-height:1.6;
+    margin:-8px 0 26px 0;
+  }
+
+  .shap-row{
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+
+  .shap-row:last-child{
+    border-bottom:none;
+    padding-bottom:0;
+  }
+
+  .shap-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+    gap:16px;
+  }
+
+  .shap-feature{
+    font-size:14px;
+    color:var(--ink);
+  }
+
+  .shap-direction{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.01em;
+  }
+
+  .shap-direction.positive{ color:var(--teal); }
+  .shap-direction.negative{ color:var(--rust); }
+
+  .shap-track{
+    position:relative;
+    height:10px;
+    background:var(--line);
+    border-radius:2px;
+    overflow:hidden;
+  }
+
+  .shap-bar{ max-width:50%; }
+
+  .shap-axis{
+    position:absolute;
+    left:50%;
+    top:0;
+    bottom:0;
+    width:1px;
+    background:rgba(16,34,39,0.25);
+  }
+
+  .shap-bar{
+    position:absolute;
+    top:0;
+    height:100%;
+  }
+
+  .shap-bar.positive{
+    left:50%;
+    background:var(--teal-bright);
+    border-radius:0 2px 2px 0;
+  }
+
+  .shap-bar.negative{
+    right:50%;
+    background:var(--rust);
+    border-radius:2px 0 0 2px;
+  }
+
+  .shap-value{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--muted);
+  }
+
+  /* ---------- back button ---------- */
+
+  .back-button{
+    margin-top:28px;
+  }
+
+  .back-button a{
+    display:inline-block;
+    font-family:var(--grotesk);
+    font-weight:600;
+    font-size:14.5px;
+    color:#EAF3F2;
+    background:var(--teal-deep);
+    text-decoration:none;
+    border-radius:3px;
+    padding:14px 30px;
+    transition:background 0.15s ease;
+  }
+
+  .back-button a:hover{
+    background:var(--ink);
+  }
+
+  @media (max-width: 620px){
+    body{padding:36px 16px 70px;}
+    .card{padding:26px 22px;}
+    .readout{flex-direction:column;align-items:flex-start;gap:18px;padding:28px 26px;}
+    .readout-confidence{text-align:left;}
+    .readout-disease{font-size:26px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <p class="eyebrow">Site Reading · Prediction Result</p>
+  <h1>Waterborne Disease Prediction</h1>
+
+  {% if error %}
+
+    <div class="card error-card">
+      <h2>Prediction Error</h2>
+      <p>{{ error }}</p>
+    </div>
+
+  {% else %}
+
+    <!-- Readout -->
+
+    <div class="readout">
+      <div>
+        <p class="readout-label">Predicted Disease</p>
+        <p class="readout-disease">{{ prediction }}</p>
+      </div>
+      <div class="readout-confidence">
+        <div class="num">{{ confidence }}%</div>
+        <div class="cap">confidence</div>
+      </div>
+    </div>
+
+    <!-- Probability Distribution -->
+
+    <div class="card">
+
+      <h2 class="section">Disease Probability Distribution</h2>
+
+      {% for item in probabilities %}
+
+        <div class="probability-row">
+          <div class="probability-header">
+            <span class="name">{{ item.disease }}</span>
+            <span class="pct">{{ item.probability }}%</span>
+          </div>
+          <div class="bar-container">
+            <div class="bar" style="width: {{ item.probability }}%;"></div>
+          </div>
+        </div>
+
+      {% endfor %}
+
+    </div>
+
+    <!-- SHAP Explanation -->
+
+    {% if shap_explanations %}
+
+      <div class="card">
+
+        <h2 class="section">Explainable AI (SHAP) Analysis</h2>
+
+        <p class="shap-description">
+          These readings had the greatest influence on the predicted
+          disease, {{ prediction }}. Bars extending right pushed the
+          prediction toward this result; bars extending left pushed
+          against it.
+        </p>
+
+        {% for item in shap_explanations %}
+
+          <div class="shap-row">
+
+            <div class="shap-head">
+              <span class="shap-feature">{{ item.feature }}</span>
+              {% if item.shap_value > 0 %}
+                <span class="shap-direction positive">Increased prediction</span>
+              {% else %}
+                <span class="shap-direction negative">Decreased prediction</span>
+              {% endif %}
+            </div>
+
+            <div class="shap-track">
+              <div class="shap-axis"></div>
+              <div class="shap-bar {{ item.direction }}" style="width: calc({{ item.bar_width }}% / 2);"></div>
+            </div>
+
+            <div class="shap-value">{{ "%.4f"|format(item.shap_value) }}</div>
+
+          </div>
+
+        {% endfor %}
+
+      </div>
+
+    {% endif %}
+
+  {% endif %}
+
+  <div class="back-button">
+    <a href="/">← Predict Again</a>
+  </div>
+
+</div>
+
+</body>
+</html>
