@@ -310,11 +310,11 @@ def api_predict():
             )
 
         # SHAP explanation
-        '''shap_explanations = get_shap_explanation(
+        shap_explanations = get_shap_explanation(
             input_df,
             prediction
-        )'''
-        shap_explanations = []
+        )
+        '''shap_explanations = []'''
 
         return {
             "predicted_disease": prediction,
