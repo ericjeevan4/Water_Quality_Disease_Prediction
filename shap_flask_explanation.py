@@ -83,14 +83,25 @@ def get_shap_explanation(input_df, predicted_class):
     shap_array = np.asarray(shap_values)
 
     print("SHAP ARRAY SHAPE:", shap_array.shape)
-    print("MODEL CLASSES:", model.classes_)
-    print("NUMBER OF PROCESSED FEATURES:", len(preprocessor.get_feature_names_out()))
-
+    
+    # Number of features and classes
+    n_features = len(preprocessor.get_feature_names_out())
+    n_classes = len(model.classes_)
+    
+    # LightGBM returns:
+    # features + 1 base value, for each class
+    # Example: 38 × 8 = 304
+    shap_array = shap_array.reshape(
+        1,
+        n_features + 1,
+        n_classes
+    )
+    
     # Find predicted class index
     class_index = list(model.classes_).index(predicted_class)
-
+    
     # Get SHAP values for predicted disease
-    # Last value is the expected/base value, so exclude it
+    # Last feature position is the base/expected value
     class_shap_values = shap_array[0, :-1, class_index]
 
     # Get processed feature names
