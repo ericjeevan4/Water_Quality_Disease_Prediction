@@ -82,6 +82,10 @@ def get_shap_explanation(input_df, predicted_class):
     # (samples, features, classes)
     shap_array = np.asarray(shap_values)
 
+    print("SHAP ARRAY SHAPE:", shap_array.shape)
+    print("MODEL CLASSES:", model.classes_)
+    print("NUMBER OF PROCESSED FEATURES:", len(preprocessor.get_feature_names_out()))
+
     # Find predicted class index
     class_index = list(model.classes_).index(predicted_class)
 
