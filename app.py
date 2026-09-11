@@ -211,6 +211,11 @@ def predict():
 def api_predict():
 
     try:
+
+        start_time = time.time()
+
+        print("========== API PREDICTION STARTED ==========")
+
         data = request.get_json()
 
         # Required input features
@@ -286,13 +291,29 @@ def api_predict():
         )
 
         # Preprocess
+        preprocess_start = time.time()
+        
         X_processed = preprocessor.transform(input_df)
-
+        
+        print(
+            "API preprocessing time:",
+            round(time.time() - preprocess_start, 4),
+            "seconds"
+        )
+        
+        
         # Prediction
+        prediction_start = time.time()
+        
         prediction = model.predict(X_processed)[0]
-
-        # Probabilities
+        
         probabilities = model.predict_proba(X_processed)[0]
+        
+        print(
+            "API model prediction time:",
+            round(time.time() - prediction_start, 4),
+            "seconds"
+        )
 
         # Confidence
         confidence = float(np.max(probabilities)) * 100
@@ -310,10 +331,32 @@ def api_predict():
             )
 
         # SHAP explanation
+        # SHAP explanation
+        shap_start = time.time()
+        
         shap_explanations = get_shap_explanation(
             input_df,
             prediction
         )
+        
+        print(
+            "API SHAP calculation time:",
+            round(time.time() - shap_start, 4),
+            "seconds"
+        )
+        
+        print(
+            "API TOTAL prediction time:",
+            round(time.time() - start_time, 4),
+            "seconds"
+        )
+        
+        print("========== API PREDICTION COMPLETED ==========")
+
+        '''shap_explanations = get_shap_explanation(
+            input_df,
+            prediction
+        )'''
         '''shap_explanations = []'''
 
         return {
