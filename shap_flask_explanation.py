@@ -75,6 +75,7 @@ def get_shap_explanation(input_df, predicted_class):
     # Calculate SHAP values
     shap_values = explainer.shap_values(
         X_processed,
+        approximate=True,
         check_additivity=False
     )
 
