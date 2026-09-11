@@ -1,418 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prediction Result</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
 
-  :root{
-    --ink:#102227;
-    --teal-deep:#0B4F5C;
-    --teal:#146873;
-    --teal-bright:#1C8C93;
-    --paper:#F4F7F6;
-    --panel:#FFFFFF;
-    --line:#DCE6E4;
-    --rust:#B24A3B;
-    --rust-soft:#E7C9C3;
-    --muted:#5C7570;
-    --mono:'IBM Plex Mono', monospace;
-    --sans:'IBM Plex Sans', sans-serif;
-    --grotesk:'Space Grotesk', sans-serif;
-  }
+    <meta charset="UTF-8">
 
-  *{box-sizing:border-box;}
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-  body{
-    margin:0;
-    font-family:var(--sans);
-    background:var(--paper);
-    color:var(--ink);
-    -webkit-font-smoothing:antialiased;
-    padding:56px 24px 90px;
-  }
+    <title>
+        Prediction Result
+    </title>
 
-  .wrap{
-    max-width:760px;
-    margin:0 auto;
-  }
+    <style>
 
-  .eyebrow{
-    font-family:var(--mono);
-    font-size:12.5px;
-    color:var(--teal);
-    margin:0 0 10px 0;
-  }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f9;
+            margin: 0;
+            padding: 30px;
+        }
 
-  h1{
-    font-family:var(--grotesk);
-    font-size:26px;
-    font-weight:600;
-    letter-spacing:-0.01em;
-    margin:0 0 40px 0;
-    color:var(--ink);
-  }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
 
-  .card{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:36px 38px;
-    margin-bottom:22px;
-  }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
 
-  /* ---------- error ---------- */
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
-  .error-card{
-    border-left:4px solid var(--rust);
-    padding:28px 32px;
-  }
+        h2 {
+            margin-bottom: 15px;
+        }
 
-  .error-card h2{
-    font-family:var(--grotesk);
-    font-size:18px;
-    margin:0 0 10px 0;
-    color:var(--rust);
-  }
+        .prediction {
+            text-align: center;
+            padding: 25px;
+            border-radius: 10px;
+            background: #f1f1f1;
+            margin-bottom: 25px;
+        }
 
-  .error-card p{
-    margin:0;
-    font-family:var(--mono);
-    font-size:13.5px;
-    color:var(--ink);
-    line-height:1.6;
-  }
+        .prediction h2 {
+            margin: 0 0 10px 0;
+        }
 
-  /* ---------- readout ---------- */
+        .disease {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
 
-  .readout{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:24px;
-    background:
-      radial-gradient(120% 160% at 100% 0%, rgba(28,140,147,0.28), transparent 55%),
-      linear-gradient(175deg, var(--teal-deep) 0%, var(--ink) 100%);
-    color:#EAF3F2;
-    border-radius:4px;
-    padding:38px 40px;
-    margin-bottom:22px;
-  }
+        .confidence {
+            font-size: 18px;
+            color: #555;
+        }
 
-  .readout-label{
-    font-family:var(--mono);
-    font-size:12px;
-    color:#8FC4C0;
-    margin:0 0 12px 0;
-  }
+        /* Disease probability */
 
-  .readout-disease{
-    font-family:var(--grotesk);
-    font-size:34px;
-    font-weight:600;
-    line-height:1.15;
-    margin:0;
-  }
+        .probability-row {
+            margin-bottom: 18px;
+        }
 
-  .readout-confidence{
-    text-align:right;
-    flex-shrink:0;
-  }
+        .probability-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
 
-  .readout-confidence .num{
-    font-family:var(--mono);
-    font-size:38px;
-    font-weight:500;
-    line-height:1;
-  }
+        .bar-container {
+            width: 100%;
+            height: 22px;
+            background: #e5e5e5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-  .readout-confidence .cap{
-    font-family:var(--mono);
-    font-size:11px;
-    color:#8FC4C0;
-    margin-top:6px;
-  }
+        .bar {
+            height: 100%;
+            background: #555;
+            border-radius: 10px;
+        }
 
-  /* ---------- section headers ---------- */
+        /* SHAP Explanation */
 
-  h2.section{
-    font-family:var(--grotesk);
-    font-size:16px;
-    font-weight:600;
-    margin:0 0 22px 0;
-    padding-bottom:16px;
-    border-bottom:1px solid var(--line);
-  }
+        .shap-section {
+            margin-top: 25px;
+        }
 
-  /* ---------- probability distribution ---------- */
+        .shap-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
 
-  .probability-row{
-    margin-bottom:20px;
-  }
+        .shap-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #e5e5e5;
+            gap: 20px;
+        }
 
-  .probability-row:last-child{
-    margin-bottom:0;
-  }
+        .shap-row:last-child {
+            border-bottom: none;
+        }
 
-  .probability-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    margin-bottom:7px;
-  }
+        .shap-feature {
+            flex: 1;
+        }
 
-  .probability-header .name{
-    font-size:14px;
-    color:var(--ink);
-  }
+        .shap-feature strong {
+            display: block;
+            margin-bottom: 5px;
+        }
 
-  .probability-header .pct{
-    font-family:var(--mono);
-    font-size:13px;
-    color:var(--muted);
-  }
+        .positive {
+            font-size: 13px;
+            color: #333;
+        }
 
-  .bar-container{
-    width:100%;
-    height:8px;
-    background:var(--line);
-    border-radius:2px;
-    overflow:hidden;
-  }
+        .negative {
+            font-size: 13px;
+            color: #777;
+        }
 
-  .bar{
-    height:100%;
-    background:var(--teal-bright);
-    border-radius:2px;
-  }
+        .shap-value {
+            min-width: 90px;
+            text-align: right;
+            font-weight: bold;
+            font-family: monospace;
+        }
 
-  /* ---------- SHAP tornado ---------- */
+        .shap-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #e5e5e5;
+            border-radius: 5px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
 
-  .shap-description{
-    color:var(--muted);
-    font-size:13.5px;
-    line-height:1.6;
-    margin:-8px 0 26px 0;
-  }
+        .shap-bar {
+            height: 100%;
+            border-radius: 5px;
+        }
 
-  .shap-row{
-    padding:16px 0;
-    border-bottom:1px solid var(--line);
-  }
+        .shap-bar.positive {
+            background: #555;
+        }
 
-  .shap-row:last-child{
-    border-bottom:none;
-    padding-bottom:0;
-  }
+        .shap-bar.negative {
+            background: #999;
+        }
+        /* Back button */
 
-  .shap-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    margin-bottom:10px;
-    gap:16px;
-  }
+        .back-button {
+            text-align: center;
+            margin-top: 25px;
+        }
 
-  .shap-feature{
-    font-size:14px;
-    color:var(--ink);
-  }
+        .back-button a {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+        }
 
-  .shap-direction{
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:0.01em;
-  }
+        .back-button a:hover {
+            opacity: 0.85;
+        }
 
-  .shap-direction.positive{ color:var(--teal); }
-  .shap-direction.negative{ color:var(--rust); }
+        /* Error */
 
-  .shap-track{
-    position:relative;
-    height:10px;
-    background:var(--line);
-    border-radius:2px;
-    overflow:hidden;
-  }
+        .error {
+            background: #f5f5f5;
+            border-left: 5px solid #555;
+            padding: 15px;
+            word-wrap: break-word;
+        }
 
-  .shap-bar{ max-width:50%; }
+        /* Mobile */
 
-  .shap-axis{
-    position:absolute;
-    left:50%;
-    top:0;
-    bottom:0;
-    width:1px;
-    background:rgba(16,34,39,0.25);
-  }
+        @media (max-width: 700px) {
 
-  .shap-bar{
-    position:absolute;
-    top:0;
-    height:100%;
-  }
+            body {
+                padding: 10px;
+            }
 
-  .shap-bar.positive{
-    left:50%;
-    background:var(--teal-bright);
-    border-radius:0 2px 2px 0;
-  }
+            .card {
+                padding: 20px;
+            }
 
-  .shap-bar.negative{
-    right:50%;
-    background:var(--rust);
-    border-radius:2px 0 0 2px;
-  }
+            .disease {
+                font-size: 26px;
+            }
 
-  .shap-value{
-    font-family:var(--mono);
-    font-size:12.5px;
-    color:var(--muted);
-  }
+            .shap-row {
+                align-items: flex-start;
+            }
 
-  /* ---------- back button ---------- */
+            .shap-value {
+                min-width: 70px;
+            }
 
-  .back-button{
-    margin-top:28px;
-  }
+        }
 
-  .back-button a{
-    display:inline-block;
-    font-family:var(--grotesk);
-    font-weight:600;
-    font-size:14.5px;
-    color:#EAF3F2;
-    background:var(--teal-deep);
-    text-decoration:none;
-    border-radius:3px;
-    padding:14px 30px;
-    transition:background 0.15s ease;
-  }
+    </style>
 
-  .back-button a:hover{
-    background:var(--ink);
-  }
-
-  @media (max-width: 620px){
-    body{padding:36px 16px 70px;}
-    .card{padding:26px 22px;}
-    .readout{flex-direction:column;align-items:flex-start;gap:18px;padding:28px 26px;}
-    .readout-confidence{text-align:left;}
-    .readout-disease{font-size:26px;}
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    *{transition:none !important;}
-  }
-
-</style>
 </head>
+
 
 <body>
 
-<div class="wrap">
-
-  <p class="eyebrow">Site Reading · Prediction Result</p>
-  <h1>Waterborne Disease Prediction</h1>
-
-  {% if error %}
-
-    <div class="card error-card">
-      <h2>Prediction Error</h2>
-      <p>{{ error }}</p>
-    </div>
-
-  {% else %}
-
-    <!-- Readout -->
-
-    <div class="readout">
-      <div>
-        <p class="readout-label">Predicted Disease</p>
-        <p class="readout-disease">{{ prediction }}</p>
-      </div>
-      <div class="readout-confidence">
-        <div class="num">{{ confidence }}%</div>
-        <div class="cap">confidence</div>
-      </div>
-    </div>
-
-    <!-- Probability Distribution -->
+<div class="container">
 
     <div class="card">
 
-      <h2 class="section">Disease Probability Distribution</h2>
+        <h1>
+            Waterborne Disease Prediction Result
+        </h1>
 
-      {% for item in probabilities %}
 
-        <div class="probability-row">
-          <div class="probability-header">
-            <span class="name">{{ item.disease }}</span>
-            <span class="pct">{{ item.probability }}%</span>
-          </div>
-          <div class="bar-container">
-            <div class="bar" style="width: {{ item.probability }}%;"></div>
-          </div>
+        {% if error %}
+
+            <div class="error">
+
+                <h2>
+                    Prediction Error
+                </h2>
+
+                <p>
+                    {{ error }}
+                </p>
+
+            </div>
+
+
+        {% else %}
+
+            <!-- Prediction -->
+
+            <div class="prediction">
+
+                <h2>
+                    Predicted Disease
+                </h2>
+
+                <div class="disease">
+                    {{ prediction }}
+                </div>
+
+                <div class="confidence">
+
+                    Prediction Confidence:
+
+                    <strong>
+                        {{ confidence }}%
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- Probability Distribution -->
+
+            <h2>
+                Disease Probability Distribution
+            </h2>
+
+
+            {% for item in probabilities %}
+
+                <div class="probability-row">
+
+                    <div class="probability-header">
+
+                        <span>
+                            {{ item.disease }}
+                        </span>
+
+                        <span>
+                            {{ item.probability }}%
+                        </span>
+
+                    </div>
+
+
+                    <div class="bar-container">
+
+                        <div class="bar"
+                             style="width: {{ item.probability }}%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+            <!-- SHAP Explanation -->
+
+            {% if shap_explanations %}
+
+                <div class="card shap-section">
+
+                    <h2>
+                        Explainable AI (SHAP) Analysis
+                    </h2>
+
+                    <p class="shap-description">
+
+                        The following features had the greatest influence
+                        on the predicted disease:
+
+                        <strong>
+                            {{ prediction }}
+                        </strong>
+
+                    </p>
+
+
+                    {% for item in shap_explanations %}
+
+                        <div class="shap-row">
+
+                            <div class="shap-feature">
+
+                                <strong>
+                                    {{ item.feature }}
+                                </strong>
+
+
+                                {% if item.shap_value > 0 %}
+
+                                    <span class="positive">
+                                        Increased prediction
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="negative">
+                                        Decreased prediction
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="shap-value">
+
+                                {{ "%.4f"|format(item.shap_value) }}
+
+                                <div class="shap-bar-container">
+
+                                    <div class="shap-bar {{ item.direction }}"
+                                        style="width: {{ item.bar_width }}%;">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+        {% endif %}
+
+
+        <!-- Predict Again -->
+
+        <div class="back-button">
+
+            <a href="/">
+                ← Predict Again
+            </a>
+
         </div>
 
-      {% endfor %}
 
     </div>
-
-    <!-- SHAP Explanation -->
-
-    {% if shap_explanations %}
-
-      <div class="card">
-
-        <h2 class="section">Explainable AI (SHAP) Analysis</h2>
-
-        <p class="shap-description">
-          These readings had the greatest influence on the predicted
-          disease, {{ prediction }}. Bars extending right pushed the
-          prediction toward this result; bars extending left pushed
-          against it.
-        </p>
-
-        {% for item in shap_explanations %}
-
-          <div class="shap-row">
-
-            <div class="shap-head">
-              <span class="shap-feature">{{ item.feature }}</span>
-              {% if item.shap_value > 0 %}
-                <span class="shap-direction positive">Increased prediction</span>
-              {% else %}
-                <span class="shap-direction negative">Decreased prediction</span>
-              {% endif %}
-            </div>
-
-            <div class="shap-track">
-              <div class="shap-axis"></div>
-              <div class="shap-bar {{ item.direction }}" style="width: calc({{ item.bar_width }}% / 2);"></div>
-            </div>
-
-            <div class="shap-value">{{ "%.4f"|format(item.shap_value) }}</div>
-
-          </div>
-
-        {% endfor %}
-
-      </div>
-
-    {% endif %}
-
-  {% endif %}
-
-  <div class="back-button">
-    <a href="/">← Predict Again</a>
-  </div>
 
 </div>
 
 </body>
+
 </html>
