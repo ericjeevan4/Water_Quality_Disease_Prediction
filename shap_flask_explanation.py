@@ -73,10 +73,9 @@ def get_shap_explanation(input_df, predicted_class):
     X_processed = preprocessor.transform(input_df)
 
     # Calculate SHAP values
-    shap_values = explainer.shap_values(
+    shap_values = model.predict(
         X_processed,
-        approximate=True,
-        check_additivity=False
+        pred_contrib=True
     )
 
     # SHAP 0.51 multiclass format:
@@ -87,7 +86,8 @@ def get_shap_explanation(input_df, predicted_class):
     class_index = list(model.classes_).index(predicted_class)
 
     # Get SHAP values for predicted disease
-    class_shap_values = shap_array[0, :, class_index]
+    # Last value is the expected/base value, so exclude it
+    class_shap_values = shap_array[0, :-1, class_index]
 
     # Get processed feature names
     feature_names = preprocessor.get_feature_names_out()
