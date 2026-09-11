@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import time
 import joblib
 import pandas as pd
 import numpy as np
@@ -53,6 +54,10 @@ def home():
 def predict():
 
     try:
+        start_time = time.time()
+
+        print("========== PREDICTION STARTED ==========")
+
         data = {}
 
         # Numerical features
@@ -117,13 +122,29 @@ def predict():
         )
 
         # Preprocess
+        preprocess_start = time.time()
+        
         X_processed = preprocessor.transform(input_df)
-
+        
+        print(
+            "Preprocessing time:",
+            round(time.time() - preprocess_start, 4),
+            "seconds"
+        )
+        
+        
         # Prediction
+        prediction_start = time.time()
+        
         prediction = model.predict(X_processed)[0]
-
-        # Prediction probabilities
+        
         probabilities = model.predict_proba(X_processed)[0]
+        
+        print(
+            "Model prediction time:",
+            round(time.time() - prediction_start, 4),
+            "seconds"
+        )
 
         # Convert prediction to disease name
         predicted_disease = prediction
@@ -150,10 +171,26 @@ def predict():
         )
 
         # Generate SHAP explanation
+        shap_start = time.time()
+        
         shap_explanations = get_shap_explanation(
             input_df,
             predicted_disease
         )
+        
+        print(
+            "SHAP calculation time:",
+            round(time.time() - shap_start, 4),
+            "seconds"
+        )
+        
+        print(
+            "TOTAL prediction time:",
+            round(time.time() - start_time, 4),
+            "seconds"
+        )
+        
+        print("========== PREDICTION COMPLETED ==========")
 
         return render_template(
             "result.html",
