@@ -1,591 +1,616 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Quality &amp; Disease Prediction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
 
-    <meta charset="UTF-8">
+  :root{
+    --ink:#102227;
+    --teal-deep:#0B4F5C;
+    --teal:#146873;
+    --teal-bright:#1C8C93;
+    --paper:#F4F7F6;
+    --panel:#FFFFFF;
+    --line:#DCE6E4;
+    --rust:#B24A3B;
+    --muted:#5C7570;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+    --grotesk:'Space Grotesk', sans-serif;
+  }
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+  *{box-sizing:border-box;}
 
-    <title>
-        Water Quality Disease Prediction
-    </title>
+  html,body{margin:0;padding:0;}
 
-    <style>
+  body{
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f9;
-            margin: 0;
-            padding: 30px;
-        }
+  a{color:inherit;}
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+  /* ---------- layout shell ---------- */
 
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
+  .shell{
+    display:grid;
+    grid-template-columns:360px 1fr;
+    min-height:100vh;
+  }
 
-        .description {
-            text-align: center;
-            color: #555;
-            margin-bottom: 30px;
-        }
+  /* ---------- sidebar ---------- */
 
-        .section-title {
-            margin-top: 30px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #ddd;
-        }
+  .sidebar{
+    position:sticky;
+    top:0;
+    height:100vh;
+    background:
+      radial-gradient(120% 140% at 0% 0%, rgba(28,140,147,0.35), transparent 55%),
+      linear-gradient(175deg, var(--teal-deep) 0%, var(--ink) 100%);
+    color:#EAF3F2;
+    padding:52px 40px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+  }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
+  .brand-mark{
+    width:34px;
+    height:34px;
+    margin-bottom:28px;
+  }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
+  .sidebar h1{
+    font-family:var(--grotesk);
+    font-weight:600;
+    font-size:30px;
+    line-height:1.22;
+    letter-spacing:-0.01em;
+    margin:0 0 18px 0;
+  }
 
-        label {
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
+  .sidebar p.lede{
+    font-size:15px;
+    line-height:1.65;
+    color:#B9D3D0;
+    max-width:30ch;
+    margin:0;
+  }
 
-        input,
-        select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
-        }
+  .stations{
+    margin-top:48px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
 
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #555;
-        }
+  .station-item{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    padding:14px 0;
+    border-top:1px solid rgba(234,243,242,0.14);
+    font-size:13.5px;
+  }
 
-        .button-container {
-            text-align: center;
-            margin-top: 35px;
-        }
+  .station-item:last-child{
+    border-bottom:1px solid rgba(234,243,242,0.14);
+  }
 
-        button {
-            padding: 13px 35px;
-            font-size: 17px;
-            border: none;
-            border-radius: 7px;
-            cursor: pointer;
-            background: #333;
-            color: white;
-        }
+  .station-item .num{
+    font-family:var(--mono);
+    color:#7FB8B4;
+    font-size:12px;
+  }
 
-        button:hover {
-            opacity: 0.85;
-        }
+  .station-item .label{
+    color:#DCEDEB;
+  }
 
-        @media (max-width: 700px) {
+  .sidebar-foot{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#6E9C97;
+    letter-spacing:0.02em;
+    line-height:1.7;
+  }
 
-            .grid {
-                grid-template-columns: 1fr;
-            }
+  .wave{
+    position:absolute;
+    right:-40px;
+    bottom:-30px;
+    width:280px;
+    opacity:0.35;
+    pointer-events:none;
+  }
 
-            body {
-                padding: 10px;
-            }
+  /* ---------- main / form ---------- */
 
-            .container {
-                padding: 20px;
-            }
-        }
+  .main{
+    padding:56px 64px 100px;
+    max-width:820px;
+  }
 
-    </style>
+  .main-intro{
+    margin-bottom:44px;
+  }
 
+  .main-intro .kicker{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--teal);
+    margin:0 0 10px 0;
+  }
+
+  .main-intro h2{
+    font-family:var(--grotesk);
+    font-size:22px;
+    font-weight:600;
+    margin:0;
+    color:var(--ink);
+  }
+
+  fieldset{
+    border:none;
+    margin:0;
+    padding:0;
+  }
+
+  .station{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:34px 36px 30px;
+    margin-bottom:22px;
+  }
+
+  .station-head{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:26px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .station-head .tag{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--teal-bright);
+    background:rgba(28,140,147,0.09);
+    border:1px solid rgba(28,140,147,0.25);
+    border-radius:3px;
+    padding:3px 9px;
+  }
+
+  .station-head h3{
+    font-family:var(--grotesk);
+    font-size:18px;
+    font-weight:600;
+    margin:0;
+    color:var(--ink);
+  }
+
+  .station-head .count{
+    margin-left:auto;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:22px 26px;
+  }
+
+  .form-group{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .form-group label{
+    font-size:13.5px;
+    color:var(--ink);
+    margin-bottom:7px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+
+  .form-group label .unit{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  input, select{
+    font-family:var(--mono);
+    font-size:14.5px;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:11px 12px;
+    width:100%;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+
+  select{
+    font-family:var(--sans);
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+    background-size:5px 5px, 5px 5px;
+    background-repeat:no-repeat;
+  }
+
+  input::placeholder{
+    color:#A9BCB8;
+  }
+
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--teal-bright);
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(28,140,147,0.14);
+  }
+
+  input:required:invalid{
+    box-shadow:none;
+  }
+
+  /* ---------- submit ---------- */
+
+  .submit-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    margin-top:36px;
+    padding-top:6px;
+  }
+
+  .submit-note{
+    font-size:12.5px;
+    color:var(--muted);
+    max-width:32ch;
+    line-height:1.6;
+  }
+
+  button{
+    font-family:var(--grotesk);
+    font-weight:600;
+    font-size:15px;
+    color:#EAF3F2;
+    background:var(--teal-deep);
+    border:none;
+    border-radius:3px;
+    padding:15px 34px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background 0.15s ease, transform 0.1s ease;
+  }
+
+  button:hover{
+    background:var(--ink);
+  }
+
+  button:active{
+    transform:translateY(1px);
+  }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 980px){
+    .shell{grid-template-columns:1fr;}
+    .sidebar{position:relative;height:auto;padding:40px 28px;}
+    .main{padding:40px 24px 80px;max-width:none;}
+  }
+
+  @media (max-width: 620px){
+    .grid{grid-template-columns:1fr;}
+    .station{padding:26px 20px 22px;}
+    .submit-row{flex-direction:column;align-items:stretch;}
+    button{width:100%;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+
+</style>
 </head>
-
 
 <body>
 
-<div class="container">
+<div class="shell">
 
-    <h1>
-        Water Quality & Disease Prediction
-    </h1>
+  <!-- ================= SIDEBAR ================= -->
 
-    <p class="description">
-        Enter water-quality and environmental parameters
-        to predict the most likely waterborne disease.
-    </p>
+  <aside class="sidebar">
 
+    <div>
 
-    <form action="/predict"
-          method="POST">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17 3C17 3 6 15.7 6 22.3C6 28.2 10.9 31 17 31C23.1 31 28 28.2 28 22.3C28 15.7 17 3 17 3Z"
+              stroke="#7FB8B4" stroke-width="1.6"/>
+        <path d="M11 22.5C11 25.5 13.5 27.5 17 27.5" stroke="#1C8C93" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
 
+      <h1>Waterborne Disease Risk Panel</h1>
 
-        <!-- ========================================= -->
-        <!-- WATER QUALITY FEATURES -->
-        <!-- ========================================= -->
+      <p class="lede">
+        Enter a site's water-quality readings and sanitation context.
+        The model cross-references all three against historical
+        outbreak patterns to flag the most likely disease.
+      </p>
 
-        <h2 class="section-title">
-            Water Quality Parameters
-        </h2>
+      <div class="stations">
+        <div class="station-item">
+          <span class="num">01</span>
+          <span class="label">Water quality parameters</span>
+        </div>
+        <div class="station-item">
+          <span class="num">02</span>
+          <span class="label">Environmental &amp; sanitation</span>
+        </div>
+        <div class="station-item">
+          <span class="num">03</span>
+          <span class="label">Source &amp; household practices</span>
+        </div>
+      </div>
 
-        <div class="grid">
+    </div>
 
+    <div class="sidebar-foot">
+      23 INPUT FIELDS · SINGLE-SITE READING<br>
+      RESULTS INCLUDE SHAP FEATURE ATTRIBUTION
+    </div>
 
-            <div class="form-group">
-                <label>
-                    Water Quality Index
-                </label>
+    <svg class="wave" viewBox="0 0 280 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 60 C 35 20, 70 100, 105 60 S 175 20, 210 60 S 280 100, 280 60"
+            stroke="#1C8C93" stroke-width="1.4"/>
+      <path d="M0 85 C 35 45, 70 125, 105 85 S 175 45, 210 85 S 280 125, 280 85"
+            stroke="#0B4F5C" stroke-width="1.4"/>
+    </svg>
 
-                <input type="number"
-                       name="water_quality_index"
-                       step="any"
-                       required>
-            </div>
+  </aside>
 
+  <!-- ================= FORM ================= -->
 
-            <div class="form-group">
-                <label>
-                    pH
-                </label>
+  <main class="main">
 
-                <input type="number"
-                       name="ph"
-                       step="any"
-                       required>
-            </div>
+    <form action="/predict" method="POST" novalidate>
 
+      <!-- STATION 01 -->
 
-            <div class="form-group">
-                <label>
-                    Turbidity (NTU)
-                </label>
+      <fieldset>
 
-                <input type="number"
-                       name="turbidity_ntu"
-                       step="any"
-                       required>
-            </div>
+        <div class="station">
 
+          <div class="station-head">
+            <span class="tag">01</span>
+            <h3>Water Quality Parameters</h3>
+            <span class="count">11 fields</span>
+          </div>
 
-            <div class="form-group">
-                <label>
-                    Dissolved Oxygen (mg/L)
-                </label>
-
-                <input type="number"
-                       name="dissolved_oxygen_mg_l"
-                       step="any"
-                       required>
-            </div>
-
+          <div class="grid">
 
             <div class="form-group">
-                <label>
-                    BOD (mg/L)
-                </label>
-
-                <input type="number"
-                       name="bod_mg_l"
-                       step="any"
-                       required>
+              <label>Water Quality Index</label>
+              <input type="number" name="water_quality_index" step="any" placeholder="0–100" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Fecal Coliform (per 100 mL)
-                </label>
-
-                <input type="number"
-                       name="fecal_coliform_per_100ml"
-                       step="any"
-                       required>
+              <label>pH <span class="unit">0–14</span></label>
+              <input type="number" name="ph" step="any" placeholder="7.0" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Total Coliform (per 100 mL)
-                </label>
-
-                <input type="number"
-                       name="total_coliform_per_100ml"
-                       step="any"
-                       required>
+              <label>Turbidity <span class="unit">NTU</span></label>
+              <input type="number" name="turbidity_ntu" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    TDS (mg/L)
-                </label>
-
-                <input type="number"
-                       name="tds_mg_l"
-                       step="any"
-                       required>
+              <label>Dissolved Oxygen <span class="unit">mg/L</span></label>
+              <input type="number" name="dissolved_oxygen_mg_l" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Nitrate (mg/L)
-                </label>
-
-                <input type="number"
-                       name="nitrate_mg_l"
-                       step="any"
-                       required>
+              <label>BOD <span class="unit">mg/L</span></label>
+              <input type="number" name="bod_mg_l" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Fluoride (mg/L)
-                </label>
-
-                <input type="number"
-                       name="fluoride_mg_l"
-                       step="any"
-                       required>
+              <label>Fecal Coliform <span class="unit">/100mL</span></label>
+              <input type="number" name="fecal_coliform_per_100ml" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Arsenic (µg/L)
-                </label>
-
-                <input type="number"
-                       name="arsenic_ug_l"
-                       step="any"
-                       required>
+              <label>Total Coliform <span class="unit">/100mL</span></label>
+              <input type="number" name="total_coliform_per_100ml" step="any" required>
             </div>
 
+            <div class="form-group">
+              <label>TDS <span class="unit">mg/L</span></label>
+              <input type="number" name="tds_mg_l" step="any" required>
+            </div>
+
+            <div class="form-group">
+              <label>Nitrate <span class="unit">mg/L</span></label>
+              <input type="number" name="nitrate_mg_l" step="any" required>
+            </div>
+
+            <div class="form-group">
+              <label>Fluoride <span class="unit">mg/L</span></label>
+              <input type="number" name="fluoride_mg_l" step="any" required>
+            </div>
+
+            <div class="form-group">
+              <label>Arsenic <span class="unit">µg/L</span></label>
+              <input type="number" name="arsenic_ug_l" step="any" required>
+            </div>
+
+          </div>
 
         </div>
 
+      </fieldset>
 
-        <!-- ========================================= -->
-        <!-- ENVIRONMENTAL & SANITATION FEATURES -->
-        <!-- ========================================= -->
+      <!-- STATION 02 -->
 
-        <h2 class="section-title">
-            Environmental & Sanitation Parameters
-        </h2>
+      <fieldset>
 
-        <div class="grid">
+        <div class="station">
 
+          <div class="station-head">
+            <span class="tag">02</span>
+            <h3>Environmental &amp; Sanitation</h3>
+            <span class="count">8 fields</span>
+          </div>
 
-            <div class="form-group">
-                <label>
-                    Open Defecation Rate (%)
-                </label>
-
-                <input type="number"
-                       name="open_defecation_rate"
-                       step="any"
-                       required>
-            </div>
-
+          <div class="grid">
 
             <div class="form-group">
-                <label>
-                    Toilet Access
-                </label>
-
-                <select name="toilet_access"
-                        required>
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option value="0">
-                        No
-                    </option>
-
-                    <option value="1">
-                        Yes
-                    </option>
-
-                </select>
+              <label>Open Defecation Rate <span class="unit">%</span></label>
+              <input type="number" name="open_defecation_rate" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Sewage Treatment (%)
-                </label>
-
-                <input type="number"
-                       name="sewage_treatment_pct"
-                       step="any"
-                       required>
+              <label>Toilet Access</label>
+              <select name="toilet_access" required>
+                <option value="">Select</option>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Flooding
-                </label>
-
-                <select name="flooding"
-                        required>
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option value="0">
-                        No
-                    </option>
-
-                    <option value="1">
-                        Yes
-                    </option>
-
-                </select>
+              <label>Sewage Treatment <span class="unit">%</span></label>
+              <input type="number" name="sewage_treatment_pct" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Average Temperature (°C)
-                </label>
-
-                <input type="number"
-                       name="avg_temperature_c"
-                       step="any"
-                       required>
+              <label>Flooding</label>
+              <select name="flooding" required>
+                <option value="">Select</option>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Average Rainfall (mm)
-                </label>
-
-                <input type="number"
-                       name="avg_rainfall_mm"
-                       step="any"
-                       required>
+              <label>Avg. Temperature <span class="unit">°C</span></label>
+              <input type="number" name="avg_temperature_c" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Average Humidity (%)
-                </label>
-
-                <input type="number"
-                       name="avg_humidity_pct"
-                       step="any"
-                       required>
+              <label>Avg. Rainfall <span class="unit">mm</span></label>
+              <input type="number" name="avg_rainfall_mm" step="any" required>
             </div>
-
 
             <div class="form-group">
-                <label>
-                    Month
-                </label>
-
-                <input type="number"
-                       name="month"
-                       min="1"
-                       max="12"
-                       required>
+              <label>Avg. Humidity <span class="unit">%</span></label>
+              <input type="number" name="avg_humidity_pct" step="any" required>
             </div>
 
+            <div class="form-group">
+              <label>Month <span class="unit">1–12</span></label>
+              <input type="number" name="month" min="1" max="12" required>
+            </div>
+
+          </div>
 
         </div>
 
+      </fieldset>
 
-        <!-- ========================================= -->
-        <!-- CATEGORICAL FEATURES -->
-        <!-- ========================================= -->
+      <!-- STATION 03 -->
 
-        <h2 class="section-title">
-            Water Source & Practices
-        </h2>
+      <fieldset>
 
-        <div class="grid">
+        <div class="station">
 
+          <div class="station-head">
+            <span class="tag">03</span>
+            <h3>Water Source &amp; Practices</h3>
+            <span class="count">4 fields</span>
+          </div>
 
-            <div class="form-group">
-
-                <label>
-                    Water Source
-                </label>
-
-                <select name="water_source"
-                        required>
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option value="Borewell">
-                        Borewell
-                    </option>
-
-                    <option value="Canal">
-                        Canal
-                    </option>
-
-                    <option value="Pond">
-                        Pond
-                    </option>
-
-                    <option value="Rainwater">
-                        Rainwater
-                    </option>
-
-                    <option value="River">
-                        River
-                    </option>
-
-                    <option value="Tap">
-                        Tap
-                    </option>
-
-                </select>
-
-            </div>
-
+          <div class="grid">
 
             <div class="form-group">
-
-                <label>
-                    Water Treatment
-                </label>
-
-                <select name="water_treatment"
-                        required>
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option value="Boiling">
-                        Boiling
-                    </option>
-
-                    <option value="Chlorination">
-                        Chlorination
-                    </option>
-
-                    <option value="Filtration">
-                        Filtration
-                    </option>
-
-                    <option value="Untreated">
-                        Untreated
-                    </option>
-
-                </select>
-
+              <label>Water Source</label>
+              <select name="water_source" required>
+                <option value="">Select</option>
+                <option value="Borewell">Borewell</option>
+                <option value="Canal">Canal</option>
+                <option value="Pond">Pond</option>
+                <option value="Rainwater">Rainwater</option>
+                <option value="River">River</option>
+                <option value="Tap">Tap</option>
+              </select>
             </div>
-
 
             <div class="form-group">
-
-                <label>
-                    Handwashing Practice
-                </label>
-
-                <select name="handwashing_practice"
-                        required>
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option value="Always">
-                        Always
-                    </option>
-
-                    <option value="Never">
-                        Never
-                    </option>
-
-                    <option value="Sometimes">
-                        Sometimes
-                    </option>
-
-                </select>
-
+              <label>Water Treatment</label>
+              <select name="water_treatment" required>
+                <option value="">Select</option>
+                <option value="Boiling">Boiling</option>
+                <option value="Chlorination">Chlorination</option>
+                <option value="Filtration">Filtration</option>
+                <option value="Untreated">Untreated</option>
+              </select>
             </div>
-
 
             <div class="form-group">
-
-                <label>
-                    Season
-                </label>
-
-                <select name="season"
-                        required>
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option value="Autumn">
-                        Autumn
-                    </option>
-
-                    <option value="Monsoon">
-                        Monsoon
-                    </option>
-
-                    <option value="Post-Monsoon">
-                        Post-Monsoon
-                    </option>
-
-                    <option value="Summer">
-                        Summer
-                    </option>
-
-                </select>
-
+              <label>Handwashing Practice</label>
+              <select name="handwashing_practice" required>
+                <option value="">Select</option>
+                <option value="Always">Always</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Never">Never</option>
+              </select>
             </div>
 
+            <div class="form-group">
+              <label>Season</label>
+              <select name="season" required>
+                <option value="">Select</option>
+                <option value="Summer">Summer</option>
+                <option value="Monsoon">Monsoon</option>
+                <option value="Post-Monsoon">Post-Monsoon</option>
+                <option value="Autumn">Autumn</option>
+              </select>
+            </div>
+
+          </div>
 
         </div>
 
+      </fieldset>
 
-        <!-- ========================================= -->
-        <!-- SUBMIT -->
-        <!-- ========================================= -->
-
-        <div class="button-container">
-
-            <button type="submit">
-                Predict Disease
-            </button>
-
-        </div>
-
+      <div class="submit-row">
+        <p class="submit-note">
+          All 23 fields are required for the model to return a confident prediction.
+        </p>
+        <button type="submit">Predict Disease</button>
+      </div>
 
     </form>
+
+  </main>
 
 </div>
 
 </body>
-
 </html>
