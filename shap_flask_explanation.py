@@ -12,8 +12,11 @@ model = package["model"]
 preprocessor = package["preprocessor"]
 
 
-# Create SHAP explainer
-explainer = shap.TreeExplainer(model)
+# Create optimized SHAP explainer
+explainer = shap.TreeExplainer(
+    model,
+    feature_perturbation="tree_path_dependent"
+)
 
 
 # User-friendly feature names
@@ -70,7 +73,10 @@ def get_shap_explanation(input_df, predicted_class):
     X_processed = preprocessor.transform(input_df)
 
     # Calculate SHAP values
-    shap_values = explainer.shap_values(X_processed)
+    shap_values = explainer.shap_values(
+        X_processed,
+        check_additivity=False
+    )
 
     # SHAP 0.51 multiclass format:
     # (samples, features, classes)
